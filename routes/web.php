@@ -32,7 +32,9 @@ Route::middleware('auth')->group(function () {
     // Application routes
     Route::resource('applications', ApplicationController::class);
     Route::post('/applications/{application}/mark-applied', [ApplicationController::class, 'markAsApplied'])->name('applications.mark-applied');
+    Route::post('/applications/{application}/regenerate', [ApplicationController::class, 'regenerate'])->name('applications.regenerate');
     Route::get('/applications/{application}/export/{format}', [ApplicationController::class, 'export'])->name('applications.export');
+    Route::get('/applications/{application}/download-resume', [ApplicationController::class, 'downloadResume'])->name('applications.download-resume');
 });
 
 require __DIR__.'/auth.php';

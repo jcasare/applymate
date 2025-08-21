@@ -1,9 +1,10 @@
 # ApplyMate - AI-Powered Job Application Generator
 
-ApplyMate helps job seekers create tailored application materials in seconds using Claude AI.
+ApplyMate helps job seekers create tailored application materials in seconds using multiple AI providers including free alternatives to expensive APIs.
 
 ## Features
 
+### Core Features
 - 🎯 **ATS-Optimized Keywords** - Extract and highlight relevant keywords from job descriptions
 - 📝 **Professional Summaries** - Generate tailored resume summaries that match the role
 - 💼 **Experience Bullets** - Create impactful, quantified experience bullet points
@@ -12,13 +13,27 @@ ApplyMate helps job seekers create tailored application materials in seconds usi
 - 📊 **Application History** - Track all your generated applications
 - 📥 **Export Options** - Copy to clipboard, export as PDF, or share directly
 
+### AI Features (New!)
+- 🤖 **Multiple AI Providers** - Integrates 5+ AI providers with free tiers
+- 🔄 **AI Aggregation** - Combines results from multiple AIs for optimal output
+- 💰 **Cost-Free Operation** - Uses free API tiers, no expensive subscriptions needed
+- 🎨 **Smart Strategy Selection** - Weighted, consensus, or fastest response modes
+- 🖼️ **Vision Analysis** - Analyze resume screenshots and job posting images
+- 🔍 **Embeddings** - Semantic search and content matching
+
 ## Tech Stack
 
 - **Backend**: Laravel 11 (PHP 8.2+)
 - **Frontend**: Vue 3 with Inertia.js
 - **Styling**: Tailwind CSS
 - **Database**: MySQL (or SQLite for development)
-- **AI**: Claude API (Anthropic)
+- **AI Providers**: 
+  - Claude API (Anthropic) - Premium, toggleable
+  - HuggingFace (Free) - Open source models
+  - Groq (Free tier) - Fast inference
+  - Cohere (Free trial) - NLP specialized
+  - Google Gemini (Free tier) - Multimodal AI
+  - Together AI (Free credits) - Various models
 
 ## Requirements
 
@@ -26,7 +41,7 @@ ApplyMate helps job seekers create tailored application materials in seconds usi
 - Composer
 - Node.js 18+ and npm
 - MySQL 8.0+ (or SQLite for development)
-- Claude API key from Anthropic
+- At least one AI API key (free options available)
 
 ## Installation
 
@@ -79,16 +94,45 @@ DB_CONNECTION=sqlite
 touch database/database.sqlite
 ```
 
-### 4. Configure Claude API
+### 4. Configure AI Providers
 
-Add your Claude API key to `.env`:
+#### Option A: Use Free AI Providers (Recommended for Getting Started)
+
+Get free API keys from any of these providers:
+- **HuggingFace**: https://huggingface.co/settings/tokens (Completely free)
+- **Groq**: https://console.groq.com/keys (Free tier available)
+- **Cohere**: https://dashboard.cohere.com/api-keys (Free trial)
+- **Google Gemini**: https://makersuite.google.com/app/apikey (Free tier)
+- **Together AI**: https://api.together.xyz/ ($25 free credits)
+
+Add your API keys to `.env`:
 ```env
+# Add any or all of these (at least one required)
+HUGGINGFACE_API_KEY=your_key_here
+GROQ_API_KEY=your_key_here
+COHERE_API_KEY=your_key_here
+GEMINI_API_KEY=your_key_here
+TOGETHER_API_KEY=your_key_here
+
+# AI Configuration
+AI_DEFAULT_PROVIDER=groq
+AI_AGGREGATION_STRATEGY=weighted
+```
+
+#### Option B: Enable Claude API (Premium)
+
+Claude is now integrated as a toggleable provider alongside the free options:
+```env
+# Enable Claude (disabled by default to prioritize free providers)
+AI_CLAUDE_ENABLED=true
 CLAUDE_API_KEY=your_actual_claude_api_key_here
 CLAUDE_MODEL=claude-3-5-sonnet-20241022
 CLAUDE_MAX_TOKENS=4096
 ```
 
-Get your API key from: https://console.anthropic.com/
+Get your Claude API key from: https://console.anthropic.com/
+
+**Note**: When Claude is enabled, it receives 30% weight in aggregated responses due to its advanced capabilities.
 
 ### 5. Run Migrations
 
@@ -140,23 +184,39 @@ Visit `http://localhost:8000` in your browser.
 ApplyMate/
 ├── app/
 │   ├── Http/Controllers/
-│   │   └── ApplicationController.php    # Main application logic
+│   │   ├── ApplicationController.php    # Main application logic
+│   │   └── AIController.php            # AI endpoints controller
 │   ├── Models/
 │   │   └── Application.php              # Application model
 │   └── Services/
-│       └── ClaudeAIService.php          # Claude API integration
+│       ├── ClaudeAIService.php         # Claude API integration
+│       └── AI/
+│           ├── AIAggregatorService.php # Multi-provider aggregation
+│           ├── Contracts/              # AI interfaces
+│           └── Providers/              # Individual AI providers
+│               ├── HuggingFaceProvider.php
+│               ├── GroqProvider.php
+│               ├── CohereProvider.php
+│               └── GeminiProvider.php
 ├── resources/
 │   └── js/
-│       └── Pages/
-│           ├── Dashboard.vue            # Main dashboard
-│           └── Applications/
-│               ├── Create.vue           # Generation form
-│               ├── Index.vue            # Applications list
-│               └── Show.vue             # View application
+│       ├── Pages/
+│       │   ├── Dashboard.vue           # Main dashboard
+│       │   └── Applications/
+│       │       ├── Create.vue          # Generation form
+│       │       ├── Index.vue           # Applications list
+│       │       └── Show.vue            # View application
+│       └── Components/AI/
+│           ├── CoverLetterGenerator.vue # AI cover letter tool
+│           ├── ResumeOptimizer.vue     # Resume optimization
+│           └── AIProviderStatus.vue    # Provider monitoring
+├── config/
+│   └── ai.php                          # AI configuration
 ├── database/
-│   └── migrations/                      # Database migrations
+│   └── migrations/                     # Database migrations
 └── routes/
-    └── web.php                          # Application routes
+    ├── web.php                         # Web routes
+    └── api.php                         # API routes
 ```
 
 ## Troubleshooting
@@ -178,7 +238,14 @@ FLUSH PRIVILEGES;
   - Linux: `sudo apt-get install php-sqlite3`
   - Mac: `brew install php-sqlite`
 
-### Claude API Issues
+### AI API Issues
+
+#### Free Provider Issues
+- **Rate Limits**: Free tiers have rate limits, wait a few minutes if exceeded
+- **API Keys**: Ensure at least one provider's API key is configured
+- **Provider Status**: Check provider status at `/api/ai/providers`
+
+#### Claude API Issues (Premium)
 - Verify your API key is correct
 - Check your API usage limits at https://console.anthropic.com/
 - Ensure you have sufficient credits
@@ -214,19 +281,55 @@ php artisan view:cache
 npm run build
 ```
 
+## AI Aggregation Strategies
+
+ApplyMate intelligently combines responses from multiple AI providers:
+
+### Available Strategies
+- **Weighted** (Default): Combines responses with configurable weights for optimal results
+- **Consensus**: Only includes content that multiple providers agree on (70% threshold)
+- **Fastest**: Returns the first successful response for time-sensitive operations
+- **Single**: Uses a specific provider when needed
+
+### API Endpoints
+
+```
+POST /api/ai/generate-text      # General text generation
+POST /api/ai/cover-letter       # Generate cover letters
+POST /api/ai/optimize-resume    # Optimize resumes for ATS
+POST /api/ai/analyze-image      # Analyze resume screenshots
+GET  /api/ai/providers          # Check provider status
+```
+
 ## Security Notes
 
 - Never commit `.env` file to version control
-- Keep your Claude API key secure
+- Keep all API keys secure (both free and premium)
 - Use HTTPS in production
 - Enable CSRF protection (enabled by default)
 - Implement rate limiting for API calls
 - Regularly update dependencies
+- API keys are validated before use
+- Responses are cached to minimize API calls
 
 ## License
 
 This project is proprietary software. All rights reserved.
 
+## Free API Tier Limits
+
+| Provider | Tier | Limits | Best For |
+|----------|------|--------|----------|
+| Claude | Premium | 50-4000 req/min | Advanced reasoning, long context |
+| HuggingFace | Free | Unlimited (rate limited) | Open source models, embeddings |
+| Groq | Free | 30 req/min, 14,400 req/day | Fast inference, chat |
+| Cohere | Free Trial | 100 req/min | NLP tasks, embeddings |
+| Google Gemini | Free | 60 req/min, 1M tokens/month | Multimodal, vision |
+| Together AI | Free Credits | $25 credits | Various models |
+
 ## Support
 
-For issues or questions, please contact support or create an issue in the repository.
+For issues or questions:
+- Check the [AI Integration Documentation](AI_INTEGRATION.md)
+- Review troubleshooting section above
+- Create an issue in the repository

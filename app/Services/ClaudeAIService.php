@@ -14,14 +14,32 @@ class ClaudeAIService
 
     public function __construct()
     {
+        // Legacy service - now replaced by AI aggregation system
+        // Only initialize if old config exists for backward compatibility
         $this->apiKey = config('services.claude.api_key');
         $this->apiUrl = config('services.claude.api_url');
         $this->model = config('services.claude.model');
         $this->maxTokens = config('services.claude.max_tokens', 4096);
+        
+        // If no API key is configured, this service is effectively disabled
+        if (empty($this->apiKey)) {
+            $this->apiKey = 'disabled';
+        }
     }
 
     public function generateApplicationMaterials(array $jobData, array $profileData): array
     {
+        // If API key is disabled, return error immediately
+        if ($this->apiKey === 'disabled' || empty($this->apiKey)) {
+            return [
+                'ats_keywords' => 'Legacy Claude service is disabled. Please use the new AI aggregation system.',
+                'resume_summary' => 'Legacy Claude service is disabled. Please use the new AI aggregation system.',
+                'resume_experience' => 'Legacy Claude service is disabled. Please use the new AI aggregation system.',
+                'cover_letter' => 'Legacy Claude service is disabled. Please use the new AI aggregation system.',
+                'linkedin_post' => 'Legacy Claude service is disabled. Please use the new AI aggregation system.',
+            ];
+        }
+
         $systemPrompt = $this->getSystemPrompt();
         $userPrompt = $this->buildUserPrompt($jobData, $profileData);
 

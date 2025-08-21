@@ -21,9 +21,23 @@ const form = useForm({
     skills_list: '',
     career_highlights: '',
     education_details: '',
+    resume_file: null,
+    use_resume_upload: false,
 });
 
 const isLoading = ref(false);
+
+const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+        form.resume_file = file;
+        // Automatically check the checkbox when a file is selected
+        form.use_resume_upload = true;
+    } else {
+        form.resume_file = null;
+        form.use_resume_upload = false;
+    }
+};
 
 const submit = () => {
     isLoading.value = true;
@@ -31,6 +45,7 @@ const submit = () => {
         onFinish: () => {
             isLoading.value = false;
         },
+        forceFormData: true, // Needed for file uploads
     });
 };
 </script>
@@ -91,6 +106,55 @@ const submit = () => {
                                         placeholder="Paste the full job description here..."
                                     ></textarea>
                                     <InputError class="mt-2" :message="form.errors.job_description" />
+                                </div>
+                            </div>
+
+                            <!-- Resume Upload Section -->
+                            <div class="border-b pb-6">
+                                <h3 class="text-lg font-semibold mb-4 text-gray-900">Resume Upload (Optional)</h3>
+                                
+                                <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                    <p class="text-sm text-blue-800 mb-3">
+                                        📄 Upload your resume (PDF, DOC, DOCX) to auto-fill your profile details
+                                    </p>
+                                    
+                                    <div class="space-y-3">
+                                        <div>
+                                            <input
+                                                type="file"
+                                                id="resume_file"
+                                                accept=".pdf,.doc,.docx"
+                                                @change="handleFileUpload"
+                                                class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                                            />
+                                            <InputError class="mt-2" :message="form.errors.resume_file" />
+                                        </div>
+                                        
+                                        <div v-if="form.resume_file" class="space-y-2">
+                                            <div class="p-2 bg-green-50 border border-green-200 rounded">
+                                                <p class="text-sm text-green-800">
+                                                    ✅ Selected: {{ form.resume_file.name }}
+                                                </p>
+                                            </div>
+                                            
+                                            <label class="inline-flex items-center">
+                                                <input 
+                                                    type="checkbox" 
+                                                    class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+                                                    v-model="form.use_resume_upload"
+                                                >
+                                                <span class="ml-2 text-sm text-gray-600">
+                                                    Use this resume to auto-fill profile fields below
+                                                </span>
+                                            </label>
+                                        </div>
+                                        
+                                        <div v-if="form.use_resume_upload && form.resume_file" class="p-2 bg-yellow-50 border border-yellow-200 rounded">
+                                            <p class="text-sm text-yellow-800">
+                                                ⚡ Profile fields will be auto-filled from your resume when you submit
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 

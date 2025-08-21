@@ -28,6 +28,7 @@ class Application extends Model
         'linkedin_post',
         'status',
         'applied_at',
+        'resume_path',
     ];
 
     protected $casts = [
